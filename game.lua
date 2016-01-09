@@ -312,7 +312,7 @@ function scene:create( event )
     sceneGroup:insert(currentScoreDisplay)
     -- where the magic happens
     gameStart() 
-
+end
 --
 -- This gets called twice, once before the scene is moved on screen and again once
 -- afterwards as a result of calling composer.gotoScene()
