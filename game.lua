@@ -20,6 +20,9 @@ width = 6
 length = 4
 tiles = {}
 buttons = {}
+
+mirrorcount = 0
+
 --
 -- define local functions here
 --
@@ -81,10 +84,34 @@ local function generate(length, width)
     end
 end 
 
+local function isMirror(griddCount)
 
+	local minSpawn = math.ceil(level / 5)
+	local maxSpawn = minSpawn * 3
 
+	math.randomseed(os.time())
+	local r = math.random(1,3)
+	-- 1 = orientation 1 --> \
+	-- 2 = orientation 2 --> /
+	-- 3 = no mirror     --> 
+	if mirrorcount < maxSpawn then
+		if r == 1 then
+			mirrorcount++
+			return 1 
+		end
+		if r == 2 then
+			mirrorcount++
+			return 2
+		end
 
-
+		if girdCount >= math.floor(tileCount / 4) && mirrorCount > minSpawn then
+			if r == 3 then
+				mirrorcount++
+				return 3
+			end
+		end
+	end
+end
 
 
 function scene:create( event )
