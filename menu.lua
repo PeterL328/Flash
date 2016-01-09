@@ -11,8 +11,8 @@ local myData = require( "mydata" )
 
 local function handlePlayButtonEvent( event )
     if ( "ended" == event.phase ) then
-        composer.removeScene( "levelselect", false )
-        composer.gotoScene("levelselect", { effect = "crossFade", time = 333 })
+        composer.removeScene( "game", false )
+        composer.gotoScene("game", { effect = "crossFade", time = 333 })
     end
 end
 

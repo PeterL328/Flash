@@ -6,7 +6,6 @@ local scene = composer.newScene()
 local widget = require( "widget" )
 local json = require( "json" )
 local utility = require( "utility" )
-local physics = require( "physics" )
 local myData = require( "mydata" )
 
 -- 
@@ -48,61 +47,6 @@ local function handleLoss( event )
     return true
 end
 
-local function handleEnemyTouch( event )
-    --
-    -- When you touch the enemy:
-    --    1. Increment the score
-    --    2. Update the onscreen text that shows the score
-    --    3. Kill the object touched
-    --
-    if event.phase == "began" then
-        currentScore = currentScore + 10
-        currentScoreDisplay.text = string.format( "%06d", currentScore )
-        event.target:removeSelf()
-        return true
-    end
-end
-
-local function spawnEnemy( )
-    -- make a local copy of the scene's display group.
-    -- since this function isn't a member of the scene object,
-    -- there is no "self" to use, so access it directly.
-    local sceneGroup = scene.view  
-
-    -- generate a starting position on the screen, y will be off screne
-    local x = math.random(50, display.contentCenterX - 50)
-    local enemy = display.newCircle(x, -50, 25)
-    enemy:setFillColor( 1, 0, 0 )
-    -- 
-    -- must be inserted into the the group to be managed
-    --
-    sceneGroup:insert( enemy )
-    --
-    -- Add the physics body and the touch handler
-    --
-    physics.addBody( enemy, "dynamic", { radius = 25 } )
-    --
-    -- Since the touch handler is on an "object" and not the whole screen, 
-    -- you don't need to remove it. When Composer hides the scene, it can't be
-    -- interacted with and doesn't need removed. 
-    -- when the scene is destroyed any display objects will be removed and that
-    -- will remove this listener.
-    enemy:addEventListener( "touch", handleEnemyTouch )
-
-    --
-    -- Not needed in this implementation, but you may want to call spawnEnemy() to create one 
-    -- and you might want to pass that enemy back to the caller.
-    return enemy
-end
-
-local function spawnEnemies()
-    --
-    -- Spawn a new enemy every second until canceled.
-    -- spawnTimer holds the handle to the timer so we can cancel it later later.
-    --
-    spawnTimer = timer.performWithDelay( 1000, spawnEnemy, -1 )
-end
-
 --
 -- This function gets called when composer.gotoScene() gets called an either:
 --    a) the scene has never been visited before or
@@ -118,17 +62,6 @@ function scene:create( event )
     -- Composer to manage for you.
     local sceneGroup = self.view
 
-    -- 
-    -- You need to start the physics engine to be able to add objects to it, but...
-    --
-    physics.start()
-    --
-    -- because the scene is off screen being created, we don't want the simulation doing
-    -- anything yet, so pause it for now.
-    --
-    physics.pause()
-
-    --
     -- make a copy of the current level value out of our
     -- non-Global app wide storage table.
     --
@@ -153,10 +86,10 @@ function scene:create( event )
     -- levelText is going to be accessed from the scene:show function. It cannot be local to
     -- scene:create(). This is why it was declared at the top of the module so it can be seen 
     -- everywhere in this module
-    levelText = display.newText(myData.settings.currentLevel, 0, 0, native.systemFontBold, 48 )
+    levelText = display.newText("Level" .. myData.settings.currentLevel , 0, 0, native.systemFontBold, 20 )
     levelText:setFillColor( 0 )
-    levelText.x = display.contentCenterX
-    levelText.y = display.contentCenterY
+    levelText.x = 35
+    levelText.y = 10
     --
     -- Insert it into the scene to be managed by Composer
     --
@@ -172,24 +105,6 @@ function scene:create( event )
     --
     -- these two buttons exist as a quick way to let you test
     -- going between scenes (as well as demo widget.newButton)
-    --
-
-    local iWin = widget.newButton({
-        label = "I Win!",
-        onEvent = handleWin
-    })
-    sceneGroup:insert(iWin)
-    iWin.x = display.contentCenterX - 100
-    iWin.y = display.contentHeight - 60
-
-    local iLoose = widget.newButton({
-        label = "I Loose!",
-        onEvent = handleLoss
-    })
-    sceneGroup:insert(iLoose)
-    iLoose.x = display.contentCenterX + 100
-    iLoose.y = display.contentHeight - 60
-
 end
 
 --
@@ -201,27 +116,9 @@ function scene:show( event )
     -- Make a local reference to the scene's view for scene:show()
     --
     local sceneGroup = self.view
+    currentScore = 0
+    currentScoreDisplay.text = string.format( "%06d", currentScore )
 
-    --
-    -- event.phase == "did" happens after the scene has been transitioned on screen. 
-    -- Here is where you start up things that need to start happening, such as timers,
-    -- tranistions, physics, music playing, etc. 
-    -- In this case, resume physics by calling physics.start()
-    -- Fade out the levelText (i.e start a transition)
-    -- Start up the enemy spawning engine after the levelText fades
-    --
-    if event.phase == "did" then
-        physics.start()
-        transition.to( levelText, { time = 500, alpha = 0 } )
-        spawnTimer = timer.performWithDelay( 500, spawnEnemies )
-    else -- event.phase == "will"
-        -- The "will" phase happens before the scene transitions on screen.  This is a great
-        -- place to "reset" things that might be reset, i.e. move an object back to its starting
-        -- position. Since the scene isn't on screen yet, your users won't see things "jump" to new
-        -- locations. In this case, reset the score to 0.
-        currentScore = 0
-        currentScoreDisplay.text = string.format( "%06d", currentScore )
-    end
 end
 
 --
@@ -236,9 +133,6 @@ function scene:hide( event )
         -- anything you started elsewhere that could still be moving or triggering such as:
         -- Remove enterFrame listeners here
         -- stop timers, phsics, any audio playing
-        --
-        physics.stop()
-        timer.cancel( spawnTimer )
     end
 
 end
