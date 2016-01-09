@@ -73,11 +73,12 @@ function generate(length, width)
 		elseif isMirror(i) == 2 then
 			tiles[i] = display.newImageRect("mirror.png",sizeX,sizeY)
 			tiles[i].X =  x + adjustmentFactorX
-			tiles[i].Y = y + adjustmentFactorY
+			tiles[i].Y = y + adjustmentFactorY			
 		else
 			tiles[i] = display.newImageRect("Tile.jpg",sizeX,sizeY)
 			tiles[i].X =  x + adjustmentFactorX
 			tiles[i].Y = y + adjustmentFactorY
+			
 		end
 		
 		tileCount = tileCount + 1
@@ -93,6 +94,9 @@ function generate(length, width)
             x = 0
             y = y + sizeY
         end
+
+
+
 	end 
 end
 
@@ -103,31 +107,33 @@ function setDimensions(level)
 		length = length + factor
 	end
 end
+
 function isMirror(gridCount)
-
-	local minSpawn = math.ceil(level / 5)
-	local maxSpawn = minSpawn * 3
-
-	math.randomseed(os.time())
-	local r = math.random(1,3)
+	
+	local minSpawn = math.ceil(level / 5) -- minSpawn is based on the level
+	local maxSpawn = minSpawn * 4         -- maxSpwan based on minSpawn
+	local r = math.random(1,3)			  -- random value to choose between 3 differnt types of tiles
+	
+	if  (gridCount >= math.floor(tileCount / 4) and mirrorcount < minSpawn and r == 3) then -- if game goes through first quarter of grid and mirrorcount is still less than minimum mirror spawn required then it must spawn a mirror
+		r = math.random(1,2)	
+	end
 	-- 1 = orientation 1 --> \
 	-- 2 = orientation 2 --> /
 	-- 3 = no mirror     --> 
-	if mirrorcount < maxSpawn then
+	if mirrorcount < maxSpawn then --only spawn mirrors if mirrorcount is less than maxSpawn  FOR FAIRNESS OF THE GAMe
 		if r == 1 then
 			mirrorcount = mirrorcount + 1
 			return 1 
 		end
+
 		if r == 2 then
 			mirrorcount = mirrorcount + 1
 			return 2
 		end
-
-		if gridCount >= math.floor(tileCount / 4) and mirrorCount > minSpawn then
-			if r == 3 then
-				mirrorcount = mirrorcount + 1
-				return 3
-			end
+			
+		if r == 3 then
+			mirrorcount = mirrorcount + 1
+			return 3
 		end
 	end
 end
