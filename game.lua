@@ -21,7 +21,16 @@ length = 3
 tiles = {}
 level = 5
 buttons = {}
+<<<<<<< HEAD
 edges = {} 
+=======
+
+mirrorcount = 0
+
+--
+-- define local functions here
+--
+>>>>>>> origin/master
 local function handleWin( event )
     --
     -- When you tap the "I Win" button, reset the "nextlevel" scene, then goto it.
@@ -71,6 +80,7 @@ local function generate(length, width)
             x = 0
             y = y + sizeY
         end
+<<<<<<< HEAD
 	end 
 end
 
@@ -82,6 +92,41 @@ local function setDimensions(level)
 	end
 end
 
+=======
+    end
+end 
+
+local function isMirror(griddCount)
+
+	local minSpawn = math.ceil(level / 5)
+	local maxSpawn = minSpawn * 3
+
+	math.randomseed(os.time())
+	local r = math.random(1,3)
+	-- 1 = orientation 1 --> \
+	-- 2 = orientation 2 --> /
+	-- 3 = no mirror     --> 
+	if mirrorcount < maxSpawn then
+		if r == 1 then
+			mirrorcount++
+			return 1 
+		end
+		if r == 2 then
+			mirrorcount++
+			return 2
+		end
+
+		if girdCount >= math.floor(tileCount / 4) && mirrorCount > minSpawn then
+			if r == 3 then
+				mirrorcount++
+				return 3
+			end
+		end
+	end
+end
+
+
+>>>>>>> origin/master
 function scene:create( event )
     --
     -- self in this case is "scene", the scene object for this level. 
