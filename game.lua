@@ -290,7 +290,7 @@ function scene:create( event )
 	setDimensions(level)
 	generate(width,length)
     local background = display.newRect(display.contentCenterX, display.contentCenterY, display.contentWidth, display.contentHeight)
-    background:setFillColor( 1, 0, 1 )
+    background:setFillColor( 0, 0, 0 )
     --
     -- Insert it into the scene to be managed by Composer
     --
@@ -300,7 +300,7 @@ function scene:create( event )
     -- levelText is going to be accessed from the scene:show function. It cannot be local to
     -- scene:create(). This is why it was declared at the top of the module so it can be seen 
     -- everywhere in this module
-    levelText = display.newText("Level" .. myData.settings.currentLevel , 0, 0, native.systemFontBold, 20 )
+    levelText = display.newText("Level " .. level , 0, 0, native.systemFontBold, 20 )
     levelText:setFillColor( 0 )
     levelText.x = 35
     levelText.y = 10
