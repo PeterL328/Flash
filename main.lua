@@ -1,3 +1,14 @@
+--=======================================================================================================
+-- Project: Flash V1.0
+-- Description: A IOS, Android puzzle game 
+--               
+-- Corona SDK v2015.2799
+-- Date: Jan 9, 2015
+--
+-- Programmer: Peter Leng, Dylan Park, Josh Koza, Dane 
+-- ======================================================================================================
+
+-- Include required libraries
 local composer = require( "composer" )
 local widget = require( "widget" )
 local ads = require( "ads" )
@@ -7,9 +18,9 @@ local utility = require( "utility" )
 local myData = require( "mydata" )
 local device = require( "device" )
 
-display.setStatusBar( display.HiddenStatusBar )
-
-math.randomseed( os.time() )
+-- System setup
+display.setStatusBar( display.HiddenStatusBar ) 
+math.randomseed( os.time() ) -- gen seed
 
 if device.isAndroid then
 	widget.setTheme( "widget_theme_android_holo_light" )
@@ -31,6 +42,7 @@ if myData.settings == nil then
 	myData.settings.levels = {}
 	utility.saveTable(myData.settings, "settings.json")
 end
+
 if myData.settings.bestScore == nil then
     myData.settings.bestScore = 0
 end
