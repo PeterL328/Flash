@@ -1,14 +1,29 @@
-local composer = require( "composer" )
-local scene = composer.newScene()
+--=======================================================================================================
+-- Project: Flash V1.0
+-- Description: A IOS, Android puzzle game 
+--               
+-- Corona SDK v2015.2799
+-- Date: Jan 9, 2015
+--
+-- Programmer: Peter Leng, Dylan Park, Josh Koza, Dane 
+-- ======================================================================================================
 
+-- Include required libraries
+local composer = require( "composer" )
 local widget = require( "widget" )
 local utility = require( "utility" )
 local ads = require( "ads" )
-
-local params
-
 local myData = require( "mydata" )
 
+-- Setting up the scene
+local scene = composer.newScene()
+
+-- local variables
+local params
+
+------------------------
+-- BEGIN Event handler
+------------------------
 local function handlePlayButtonEvent( event )
     if ( "ended" == event.phase ) then
         composer.removeScene( "game", false )
@@ -23,9 +38,11 @@ local function handleSettingsButtonEvent( event )
     end
 end
 
---
+------------------------
+-- END Event handler
+------------------------
+
 -- Start the composer event handlers
---
 function scene:create( event )
     local sceneGroup = self.view
 
