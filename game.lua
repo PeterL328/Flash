@@ -30,7 +30,8 @@ tileCount = 0
 width = 2
 length = 3
 local tiles = {}
-level = 5
+local buttons = {}
+local level = 5
 mirrorcount = 0
 
 local beamGroup = display.newGroup() -- group for laser objects
@@ -84,25 +85,58 @@ local function spawnTile( sizeX, sizeY, xPos, yPos, tileType)
 	return tile
 end
 function generate(length, width)
-	local sizeX = (screenWidth * 0.8) / width
-	local sizeY = (screenHeight * 0.8) / length
+	local sizeX = (screenWidth * 0.6) / width
+	local sizeY = (screenHeight * 0.6) / length
 	local startX = display.contentCenterX - (width * sizeX)/2 + sizeX/2
 	local startY = display.contentCenterY - (length * sizeY)/2 + sizeY/2
 	for i = 1, width do
 		for j = 1, length do
 			r = math.random(1,3)
 			if r == 1 then
-				spawnTile(sizeX, sizeY, startX + (i-1) * sizeX,  startY + (j-1) * sizeY, "tile")
+				tiles[mirrorcount]=spawnTile(sizeX, sizeY, startX + (i-1) * sizeX,  startY + (j-1) * sizeY, "tile")
 			elseif r == 2 then
-				spawnTile(sizeX, sizeY, startX + (i-1) * sizeX,  startY + (j-1) * sizeY, "left")
+				tiles[mirrorcount]=spawnTile(sizeX, sizeY, startX + (i-1) * sizeX,  startY + (j-1) * sizeY, "left")
 			elseif r == 3 then
-				spawnTile(sizeX, sizeY, startX + (i-1) * sizeX,  startY + (j-1) * sizeY, "right")
+				tiles[mirrorcount]=spawnTile(sizeX, sizeY, startX + (i-1) * sizeX,  startY + (j-1) * sizeY, "right")
 			end
 			mirrorcount = mirrorcount + 1
 		end
 	end
+	spawnButtons(startX,startY, length,width,(sizeX + sizeY) * 0.12)
 end
-
+function spawnButtons(startX, startY, length, width, radius)
+	local sizeX = (screenWidth * 0.6) / width
+	local sizeY = (screenHeight * 0.6) / length
+	local x = 0
+	local y = 0
+	local count = 0
+	for i = 0, width-1 do
+		x = startX + (i) * sizeX
+		y = startY - sizeY
+		buttons[count] = display.newCircle( x, y, radius)
+		count = count + 1
+	end
+	x = x + sizeX 
+	for i = 0, length-1 do
+		y = startY + ((i) * sizeY)
+		buttons[count] = display.newCircle( x, y, radius)
+		count = count + 1
+	end
+	y = y + sizeY
+	startX = x - sizeX
+	for i = 0, width-1 do
+		x = startX - (i) * sizeX
+		buttons[count] = display.newCircle( x, y, radius)
+		count = count + 1
+	end
+	x = x - sizeX
+	startY = y - sizeY
+	for i = 0, length-1 do
+		y = startY - (i) * sizeY
+		buttons[count] = display.newCircle( x, y, radius)
+		count = count + 1
+	end
+end
 function setDimensions(level)
 	if level % 5 == 0 then 
 		factor = level / 5;
