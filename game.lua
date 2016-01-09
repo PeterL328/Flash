@@ -22,18 +22,20 @@ local currentScore          -- used to hold the numeric value of the current sco
 local currentScoreDisplay   -- will be a display.newText() that draws the score on the screen
 local levelText             -- will be a display.newText() to let you know what level you're on
 local spawnTimer            -- will be used to hold the timer for the spawning engine
+
+
+screenWidth = display.contentWidth;
+screenHeight = display.contentHeight;
 tileCount = 0
 width = 2
 length = 3
-tiles = {}
+local tiles = {}
 level = 5
-buttons = {}
-edges = {} 
 mirrorcount = 0
 
 local beamGroup = display.newGroup() -- group for laser objects
 local maxBeams = 50  
-mirror = display.newImageRect( "mirror.png", 20, 100 )
+--mirror = display.newImageRect( "mirror.png", 20, 100 )
 
 --
 -- define local functions here
@@ -65,49 +67,40 @@ local function handleLoss( event )
     end
     return true
 end
-
+local function spawnTile( sizeX, sizeY, xPos, yPos, tileType)
+	if tileType  == "tile" then
+		local tile = display.newImageRect( "Tile.png", sizeX, sizeY )
+		tile.x = xPos
+		tile.y = yPos
+	elseif  tileType  == "left" then
+		local tile = display.newImageRect( "left.png", sizeX, sizeY )
+		tile.x = xPos
+		tile.y = yPos
+	elseif  tileType  == "right" then
+		local tile = display.newImageRect( "right.png", sizeX, sizeY )
+		tile.x = xPos
+		tile.y = yPos
+	end
+	return tile
+end
 function generate(length, width)
-	local x = 0
-    local y = 0
-    local count = 0
-    for i = 1, (length * width) do
-		local sizeX = (display.contentWidth * 0.80) / width
-		local sizeY = (display.contentHeight * 0.80) / length
-		local adjustmentFactorX = display.contentWidth / width
-		local adjustmentFactorY = display.contentHeight / length
-		
-		if isMirror(i) == 1 then
-			tiles[i] = display.newImageRect("mirror.png",sizeX,sizeY)
-			tiles[i].X =  x + adjustmentFactorX
-			tiles[i].Y = y + adjustmentFactorY
-		elseif isMirror(i) == 2 then
-			tiles[i] = display.newImageRect("mirror.png",sizeX,sizeY)
-			tiles[i].X =  x + adjustmentFactorX
-			tiles[i].Y = y + adjustmentFactorY			
-		else
-			tiles[i] = display.newImageRect("Tile.jpg",sizeX,sizeY)
-			tiles[i].X =  x + adjustmentFactorX
-			tiles[i].Y = y + adjustmentFactorY
-			
+	local sizeX = (screenWidth * 0.8) / width
+	local sizeY = (screenHeight * 0.8) / length
+	local startX = display.contentCenterX - (width * sizeX)/2 + sizeX/2
+	local startY = display.contentCenterY - (length * sizeY)/2 + sizeY/2
+	for i = 1, width do
+		for j = 1, length do
+			r = math.random(1,3)
+			if r == 1 then
+				spawnTile(sizeX, sizeY, startX + (i-1) * sizeX,  startY + (j-1) * sizeY, "tile")
+			elseif r == 2 then
+				spawnTile(sizeX, sizeY, startX + (i-1) * sizeX,  startY + (j-1) * sizeY, "left")
+			elseif r == 3 then
+				spawnTile(sizeX, sizeY, startX + (i-1) * sizeX,  startY + (j-1) * sizeY, "right")
+			end
+			mirrorcount = mirrorcount + 1
 		end
-		
-		tileCount = tileCount + 1
-		tiles[i].strokeWidth = 1
-		tiles[i]:setFillColor( 1, 1, 1 )
-		tiles[i]:setStrokeColor( 0, 0, 0)
-		
-        x = x + sizeX
-        count = count + 1
-		
-        if count == width then
-            count = 0
-            x = 0
-            y = y + sizeY
-        end
-
-
-
-	end 
+	end
 end
 
 function setDimensions(level)
@@ -293,11 +286,11 @@ function scene:create( event )
     -- going between scenes (as well as demo widget.newButton)
     
     
-    physics.addBody( mirror, "static", { shape={-9,-49,9,-49,9,49,-9,49} } )
-    mirror.x = display.contentCenterX
-    mirror.y = display.contentCenterY
-    sceneGroup:insert( mirror)
-    castRay(0,0,1100,700 )
+    --physics.addBody( mirror, "static", { shape={-9,-49,9,-49,9,49,-9,49} } )
+   -- mirror.x = display.contentCenterX
+    --mirror.y = display.contentCenterY
+   -- sceneGroup:insert( mirror)
+   -- castRay(0,0,1100,700 )
 end
 
 --
