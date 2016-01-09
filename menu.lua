@@ -16,19 +16,6 @@ local function handlePlayButtonEvent( event )
     end
 end
 
-local function handleHelpButtonEvent( event )
-    if ( "ended" == event.phase ) then
-        composer.gotoScene("help", { effect = "crossFade", time = 333, isModal = true })
-    end
-end
-
-local function handleCreditsButtonEvent( event )
-
-    if ( "ended" == event.phase ) then
-        composer.gotoScene("gamecredits", { effect = "crossFade", time = 333 })
-    end
-end
-
 local function handleSettingsButtonEvent( event )
 
     if ( "ended" == event.phase ) then
@@ -68,7 +55,7 @@ function scene:create( event )
         onEvent = handlePlayButtonEvent
     })
     playButton.x = display.contentCenterX
-    playButton.y = display.contentCenterY - 90
+    playButton.y = display.contentCenterY * 0.5 + 80
     sceneGroup:insert( playButton )
 
     -- Create the widget
@@ -80,32 +67,8 @@ function scene:create( event )
         onEvent = handleSettingsButtonEvent
     })
     settingsButton.x = display.contentCenterX
-    settingsButton.y = display.contentCenterY - 30
+    settingsButton.y = display.contentCenterY * 0.5 + 120
     sceneGroup:insert( settingsButton )
-
-    -- Create the widget
-    local helpButton = widget.newButton({
-        id = "button3",
-        label = "Help",
-        width = 100,
-        height = 32,
-        onEvent = handleHelpButtonEvent
-    })
-    helpButton.x = display.contentCenterX
-    helpButton.y = display.contentCenterY + 30
-    sceneGroup:insert( helpButton )
-
-    -- Create the widget
-    local creditsButton = widget.newButton({
-        id = "button4",
-        label = "Credits",
-        width = 100,
-        height = 32,
-        onEvent = handleCreditsButtonEvent
-    })
-    creditsButton.x = display.contentCenterX
-    creditsButton.y = display.contentCenterY + 90
-    sceneGroup:insert( creditsButton )
 
 end
 
