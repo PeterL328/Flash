@@ -34,6 +34,7 @@ mirrorcount = 0
 local beamGroup = display.newGroup() -- group for laser objects
 local maxBeams = 50  
 mirror = display.newImageRect( "mirror.png", 20, 100 )
+
 --
 -- define local functions here
 --
@@ -268,7 +269,9 @@ function scene:create( event )
 	setDimensions(level)
 	generate(width,length)
     local background = display.newRect(display.contentCenterX, display.contentCenterY, display.contentWidth, display.contentHeight)
+
     background:setFillColor(0,0,0)
+
     --
     -- Insert it into the scene to be managed by Composer
     --
@@ -293,6 +296,7 @@ function scene:create( event )
     --
     currentScoreDisplay = display.newText("000000", display.contentWidth - 50, 10, native.systemFont, 16 )
     sceneGroup:insert( currentScoreDisplay )
+
 		
 
     mirror = display.newImage( "mirror.png" )
@@ -306,6 +310,13 @@ function scene:create( event )
     --
     -- these two buttons exist as a quick way to let you test
     -- going between scenes (as well as demo widget.newButton)
+    
+    
+    physics.addBody( mirror, "static", { shape={-9,-49,9,-49,9,49,-9,49} } )
+    mirror.x = display.contentCenterX
+    mirror.y = display.contentCenterY
+    sceneGroup:insert( mirror)
+    castRay(0,0,1100,700 )
 end
 
 --
