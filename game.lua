@@ -21,16 +21,13 @@ length = 3
 tiles = {}
 level = 5
 buttons = {}
-<<<<<<< HEAD
 edges = {} 
-=======
 
 mirrorcount = 0
 
 --
 -- define local functions here
 --
->>>>>>> origin/master
 local function handleWin( event )
     --
     -- When you tap the "I Win" button, reset the "nextlevel" scene, then goto it.
@@ -59,7 +56,7 @@ local function handleLoss( event )
     return true
 end
 
-local function generate(length, width)
+function generate(length, width)
 	local x = 0
     local y = 0
     local count = 0
@@ -68,35 +65,45 @@ local function generate(length, width)
 		local sizeY = (display.contentHeight * 0.80) / length
 		local adjustmentFactorX = display.contentWidth / width
 		local adjustmentFactorY = display.contentHeight / length
-		tiles[i] = display.newRect( x + adjustmentFactorX, y + adjustmentFactorY, sizeX, sizeY)
+		
+		if isMirror(i) == 1 then
+			tiles[i] = display.newImageRect("mirror.png",sizeX,sizeY)
+			tiles[i].X =  x + adjustmentFactorX
+			tiles[i].Y = y + adjustmentFactorY
+		elseif isMirror(i) == 2 then
+			tiles[i] = display.newImageRect("mirror.png",sizeX,sizeY)
+			tiles[i].X =  x + adjustmentFactorX
+			tiles[i].Y = y + adjustmentFactorY
+		else
+			tiles[i] = display.newImageRect("Tile.jpg",sizeX,sizeY)
+			tiles[i].X =  x + adjustmentFactorX
+			tiles[i].Y = y + adjustmentFactorY
+		end
+		
 		tileCount = tileCount + 1
 		tiles[i].strokeWidth = 1
 		tiles[i]:setFillColor( 1, 1, 1 )
 		tiles[i]:setStrokeColor( 0, 0, 0)
+		
         x = x + sizeX
         count = count + 1
+		
         if count == width then
             count = 0
             x = 0
             y = y + sizeY
         end
-<<<<<<< HEAD
 	end 
 end
 
-local function setDimensions(level)
+function setDimensions(level)
 	if level % 5 == 0 then 
 		factor = level / 5;
 		width = width + factor
 		length = length + factor
 	end
 end
-
-=======
-    end
-end 
-
-local function isMirror(gridCount)
+function isMirror(gridCount)
 
 	local minSpawn = math.ceil(level / 5)
 	local maxSpawn = minSpawn * 3
@@ -108,25 +115,23 @@ local function isMirror(gridCount)
 	-- 3 = no mirror     --> 
 	if mirrorcount < maxSpawn then
 		if r == 1 then
-			mirrorcount++
+			mirrorcount = mirrorcount + 1
 			return 1 
 		end
 		if r == 2 then
-			mirrorcount++
+			mirrorcount = mirrorcount + 1
 			return 2
 		end
 
-		if gridCount >= math.floor(tileCount / 4) && mirrorCount > minSpawn then
+		if gridCount >= math.floor(tileCount / 4) and mirrorCount > minSpawn then
 			if r == 3 then
-				mirrorcount++
+				mirrorcount = mirrorcount + 1
 				return 3
 			end
 		end
 	end
 end
 
-
->>>>>>> origin/master
 function scene:create( event )
     --
     -- self in this case is "scene", the scene object for this level. 
