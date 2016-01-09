@@ -96,7 +96,7 @@ end
     end
 end 
 
-local function isMirror(griddCount)
+local function isMirror(gridCount)
 
 	local minSpawn = math.ceil(level / 5)
 	local maxSpawn = minSpawn * 3
@@ -116,7 +116,7 @@ local function isMirror(griddCount)
 			return 2
 		end
 
-		if girdCount >= math.floor(tileCount / 4) && mirrorCount > minSpawn then
+		if gridCount >= math.floor(tileCount / 4) && mirrorCount > minSpawn then
 			if r == 3 then
 				mirrorcount++
 				return 3
