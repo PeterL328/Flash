@@ -40,7 +40,7 @@ function scene:create( event )
     background.y = display.contentCenterY
     sceneGroup:insert( background )
 
-    local title = display.newText("Game Title", 100, 32, native.systemFontBold, 32 )
+    local title = display.newText("Flash", 100, 32, native.systemFontBold, 32 )
     title.x = display.contentCenterX
     title.y = 40
     title:setFillColor( 0 )
