@@ -78,7 +78,15 @@ local function generate(length, width)
             x = 0
             y = y + size
         end
+    end
 end 
+
+
+
+
+
+
+
 function scene:create( event )
     --
     -- self in this case is "scene", the scene object for this level. 
