@@ -15,14 +15,13 @@ local currentScore          -- used to hold the numeric value of the current sco
 local currentScoreDisplay   -- will be a display.newText() that draws the score on the screen
 local levelText             -- will be a display.newText() to let you know what level you're on
 local spawnTimer            -- will be used to hold the timer for the spawning engine
-
-width = 6
-length = 4
+tileCount = 0
+width = 2
+length = 3
 tiles = {}
+level = 5
 buttons = {}
---
--- define local functions here
---
+edges = {} 
 local function handleWin( event )
     --
     -- When you tap the "I Win" button, reset the "nextlevel" scene, then goto it.
@@ -51,34 +50,38 @@ local function handleLoss( event )
     return true
 end
 
---
--- This function gets called when composer.gotoScene() gets called an either:
---    a) the scene has never been visited before or
---    b) you called composer.removeScene() or composer.removeHidden() from some other
---       scene.  It's possible (and desirable in many cases) to call this once, but 
---       show it multiple times.
---
 local function generate(length, width)
 	local x = 0
     local y = 0
     local count = 0
-	local edges = {}
     for i = 1, (length * width) do
-		local size = (display.contentWidth * 0.80) / width
-		local adjustmentFactorX = (display.contentWidth / width) 
+		local sizeX = (display.contentWidth * 0.80) / width
+		local sizeY = (display.contentHeight * 0.80) / length
+		local adjustmentFactorX = display.contentWidth / width
 		local adjustmentFactorY = display.contentHeight / length
-		tiles[i] = display.newRect( x + adjustmentFactorX, y + adjustmentFactorY, size, size)
+		tiles[i] = display.newRect( x + adjustmentFactorX, y + adjustmentFactorY, sizeX, sizeY)
+		tileCount = tileCount + 1
 		tiles[i].strokeWidth = 1
 		tiles[i]:setFillColor( 1, 1, 1 )
 		tiles[i]:setStrokeColor( 0, 0, 0)
-        x = x + size
+        x = x + sizeX
         count = count + 1
         if count == width then
             count = 0
             x = 0
-            y = y + size
+            y = y + sizeY
         end
-end 
+	end 
+end
+
+local function setDimensions(level)
+	if level % 5 == 0 then 
+		factor = level / 5;
+		width = width + factor
+		length = length + factor
+	end
+end
+
 function scene:create( event )
     --
     -- self in this case is "scene", the scene object for this level. 
@@ -86,7 +89,8 @@ function scene:create( event )
     -- This is where you must insert everything (display.* objects only) that you want
     -- Composer to manage for you.
     local sceneGroup = self.view
-	generate(4,6)
+	setDimensions(level)
+	generate(width,length)
     local background = display.newRect(display.contentCenterX, display.contentCenterY, display.contentWidth, display.contentHeight)
     background:setFillColor( 1, 1, 1 )
     --
