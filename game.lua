@@ -16,6 +16,10 @@ local currentScoreDisplay   -- will be a display.newText() that draws the score 
 local levelText             -- will be a display.newText() to let you know what level you're on
 local spawnTimer            -- will be used to hold the timer for the spawning engine
 
+width = 6
+length = 4
+tiles = {}
+buttons = {}
 --
 -- define local functions here
 --
@@ -54,6 +58,27 @@ end
 --       scene.  It's possible (and desirable in many cases) to call this once, but 
 --       show it multiple times.
 --
+local function generate(length, width)
+	local x = 0
+    local y = 0
+    local count = 0
+	local edges = {}
+    for i = 1, (length * width) do
+		local size = (display.contentWidth * 0.80) / width
+		local adjustmentFactorX = (display.contentWidth / width) 
+		local adjustmentFactorY = display.contentHeight / length
+		tiles[i] = display.newRect( x + adjustmentFactorX, y + adjustmentFactorY, size, size)
+		tiles[i].strokeWidth = 1
+		tiles[i]:setFillColor( 1, 1, 1 )
+		tiles[i]:setStrokeColor( 0, 0, 0)
+        x = x + size
+        count = count + 1
+        if count == width then
+            count = 0
+            x = 0
+            y = y + size
+        end
+end 
 function scene:create( event )
     --
     -- self in this case is "scene", the scene object for this level. 
@@ -61,22 +86,9 @@ function scene:create( event )
     -- This is where you must insert everything (display.* objects only) that you want
     -- Composer to manage for you.
     local sceneGroup = self.view
-
-    -- make a copy of the current level value out of our
-    -- non-Global app wide storage table.
-    --
-    local thisLevel = myData.settings.currentLevel
-
-    --
-    -- create your objects here
-    --
-    
-    --
-    -- These pieces of the app only need created.  We won't be accessing them any where else
-    -- so it's okay to make it "local" here
-    --
+	generate(4,6)
     local background = display.newRect(display.contentCenterX, display.contentCenterY, display.contentWidth, display.contentHeight)
-    background:setFillColor( 0.6, 0.7, 0.3 )
+    background:setFillColor( 1, 1, 1 )
     --
     -- Insert it into the scene to be managed by Composer
     --
