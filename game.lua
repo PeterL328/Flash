@@ -35,8 +35,9 @@ local length = 3
 local tiles = {}
 local level = 5
 local buttons = {}
-local edges = {} 
+local mirrors = {}
 local mirrorcount = 0
+local tilecount = 0 
 local screenWidth = display.contentWidth;
 local screenHeight = display.contentHeight;
 
@@ -44,7 +45,6 @@ local screenHeight = display.contentHeight;
 local beamGroup = display.newGroup() -- group for laser objects
 local maxBeams = 50  -- maximun beam count
 local laserDirection -- in degrees eg. 0, 90, 180, -90
-
 
 ------------------------
 -- BEGIN Grid generation  
@@ -77,9 +77,15 @@ function generate(length, width)
 			if r == 1 then
 				tiles[mirrorcount]=spawnTile(sizeX, sizeY, startX + (i-1) * sizeX,  startY + (j-1) * sizeY, "tile")
 			elseif r == 2 then
-				tiles[mirrorcount]=spawnTile(sizeX, sizeY, startX + (i-1) * sizeX,  startY + (j-1) * sizeY, "left")
+                local mirror = display.newImageRect( "left.png", sizeX, sizeY )
+                mirror.x = startX + (i-1) * sizeX
+                mirror.y =  startY + (j-1) * sizeY
+				physics.addBody( mirror, "static", { shape={-9,-49,9,-49,9,49,-9,49} } )
 			elseif r == 3 then
-				tiles[mirrorcount]=spawnTile(sizeX, sizeY, startX + (i-1) * sizeX,  startY + (j-1) * sizeY, "right")
+				 local mirror = display.newImageRect( "right.png", sizeX, sizeY )
+                mirror.x = startX + (i-1) * sizeX
+                mirror.y =  startY + (j-1) * sizeY
+                physics.addBody( mirror, "static", { shape={-9,-49,9,-49,9,49,-9,49} } )
 			end
 			mirrorcount = mirrorcount + 1
 		end
@@ -272,6 +278,7 @@ local function gameStart()
     --1) generate level based on difficulty
     setDimensions(level)
     generate(width,length)
+    castRay(100,100, 700,100)
     --2) spawn mirror
     --3) spawn laser
     --4) test if the number of mirrors hit corresponds the current difficulty
