@@ -73,21 +73,24 @@ function generate(length, width)
 	local startY = display.contentCenterY - (length * sizeY)/2 + sizeY/2
 	for i = 1, width do
 		for j = 1, length do
-			r = math.random(1,3)
-			if r == 1 then
-				tiles[mirrorcount]=spawnTile(sizeX, sizeY, startX + (i-1) * sizeX,  startY + (j-1) * sizeY, "tile")
-			elseif r == 2 then
-                local mirror = display.newImageRect( "left.png", sizeX, sizeY )
-                mirror.x = startX + (i-1) * sizeX
-                mirror.y =  startY + (j-1) * sizeY
+			tiles[tilecount]=spawnTile(sizeX, sizeY, startX + (i-1) * sizeX,  startY + (j-1) * sizeY, "tile")
+			tilecount = tilecount + 1
+		end
+	end
+	for i = 1, width do
+		for j = 1, length do
+			local check = isMirror(i*j)
+			if check == 2 then
+				local mirror = display.newImageRect( "left.png", sizeX, sizeY )
+				mirror.x = startX + (i-1) * sizeX
+				mirror.y =  startY + (j-1) * sizeY
 				physics.addBody( mirror, "static", { shape={-9,-49,9,-49,9,49,-9,49} } )
-			elseif r == 3 then
-				 local mirror = display.newImageRect( "right.png", sizeX, sizeY )
-                mirror.x = startX + (i-1) * sizeX
-                mirror.y =  startY + (j-1) * sizeY
-                physics.addBody( mirror, "static", { shape={-9,-49,9,-49,9,49,-9,49} } )
+			elseif check == 3 then
+				local mirror = display.newImageRect( "left.png", sizeX, sizeY )
+				mirror.x = startX + (i-1) * sizeX
+				mirror.y =  startY + (j-1) * sizeY
+				physics.addBody( mirror, "static", { shape={-9,-49,9,-49,9,49,-9,49} } )
 			end
-			mirrorcount = mirrorcount + 1
 		end
 	end
 	spawnButtons(startX,startY, length,width,(sizeX + sizeY) * 0.12)
