@@ -278,7 +278,6 @@ local function gameStart()
     --1) generate level based on difficulty
     setDimensions(level)
     generate(width,length)
-    castRay(100,100, 700,100)
     --2) spawn mirror
     --3) spawn laser
     --4) test if the number of mirrors hit corresponds the current difficulty
