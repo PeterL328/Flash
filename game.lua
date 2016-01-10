@@ -315,15 +315,6 @@ function scene:create( event )
     levelText.y = 10
 
     currentScoreDisplay = display.newText("000000", display.contentWidth - 50, 10, native.systemFont, 16 )
-
-    mirror = display.newImage( "mirror.png" )
-	mirror.x = 160; mirror.y = 195
-	physics.addBody( mirror, "static", { shape={-9,-49,9,-49,9,49,-9,49} } )
-    mirror.x = display.contentCenterX
-    mirror.y = display.contentCenterY
-    sceneGroup:insert( mirror)
-        castRay(0,0,1100,700 )
-
     --
     -- these two buttons exist as a quick way to let you test
     -- going between scenes (as well as demo widget.newButton)
