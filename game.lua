@@ -1,115 +1,124 @@
---Attack of the killer cubes
+--=======================================================================================================
+-- Project: Flash V1.0
+-- Description: A IOS, Android puzzle game 
+--               
+-- Corona SDK v2015.2799
+-- Date: Jan 9, 2015
+--
+-- Programmer: Peter Leng, Dylan Park, Josh Koza, Dane 
+-- ======================================================================================================
 
-local composer = require( "composer" )
-local scene = composer.newScene()
-
-local widget = require( "widget" )
-local json = require( "json" )
+-- Include required libraries
+local composer = require( "composer" ) -- for scenes
+local widget = require( "widget" ) -- buttons 
+local json = require( "json" ) 
 local utility = require( "utility" )
 local myData = require( "mydata" )
+local physics = require( "physics" )
 
+-- Setting up the scene
+local scene = composer.newScene()
 
 -- Set up physics engine
-local physics = require("physics")
-physics.start()
-physics.setGravity( 0,0 )
+physics.start() 
+physics.setGravity( 0,0 ) -- gravity set to 0,0 since we do not need it
 physics.setDrawMode( "normal" )
--- 
 
--- define local variables here
---
+-- define local variables here 
 local currentScore          -- used to hold the numeric value of the current score
 local currentScoreDisplay   -- will be a display.newText() that draws the score on the screen
 local levelText             -- will be a display.newText() to let you know what level you're on
 local spawnTimer            -- will be used to hold the timer for the spawning engine
-tileCount = 0
-width = 2
-length = 3
-tiles = {}
-level = 5
-buttons = {}
-edges = {} 
-mirrorcount = 0
+local tileCount = 0
+local width = 2
+local length = 3
+local tiles = {}
+local level = 5
+local buttons = {}
+local edges = {} 
+local mirrorcount = 0
+local screenWidth = display.contentWidth;
+local screenHeight = display.contentHeight;
+
 
 local beamGroup = display.newGroup() -- group for laser objects
-local maxBeams = 50  
-mirror = display.newImageRect( "mirror.png", 20, 100 )
+local maxBeams = 50  -- maximun beam count
+local laserDirection -- in degrees eg. 0, 90, 180, -90
 
---
--- define local functions here
---
-local function handleWin( event )
-    --
-    -- When you tap the "I Win" button, reset the "nextlevel" scene, then goto it.
-    --
-    -- Using a button to go to the nextlevel screen isn't realistic, but however you determine to 
-    -- when the level was successfully beaten, the code below shows you how to call the gameover scene.
-    --
-    if event.phase == "ended" then
-        composer.removeScene("nextlevel")
-        composer.gotoScene("nextlevel", { time= 500, effect = "crossFade" })
-    end
-    return true
+
+------------------------
+-- BEGIN Grid generation  
+------------------------
+
+local function spawnTile( sizeX, sizeY, xPos, yPos, tileType)
+	if tileType  == "tile" then
+		local tile = display.newImageRect( "Tile.png", sizeX, sizeY )
+		tile.x = xPos
+		tile.y = yPos
+	elseif  tileType  == "left" then
+		local tile = display.newImageRect( "left.png", sizeX, sizeY )
+		tile.x = xPos
+		tile.y = yPos
+	elseif  tileType  == "right" then
+		local tile = display.newImageRect( "right.png", sizeX, sizeY )
+		tile.x = xPos
+		tile.y = yPos
+	end
+	return tile
 end
-
-local function handleLoss( event )
-    --
-    -- When you tap the "I Loose" button, reset the "gameover" scene, then goto it.
-    --
-    -- Using a button to end the game isn't realistic, but however you determine to 
-    -- end the game, the code below shows you how to call the gameover scene.
-    --
-    if event.phase == "ended" then
-        composer.removeScene("gameover")
-        composer.gotoScene("gameover", { time= 500, effect = "crossFade" })
-    end
-    return true
-end
-
 function generate(length, width)
-	local x = 0
-    local y = 0
-    local count = 0
-    for i = 1, (length * width) do
-		local sizeX = (display.contentWidth * 0.80) / width
-		local sizeY = (display.contentHeight * 0.80) / length
-		local adjustmentFactorX = display.contentWidth / width
-		local adjustmentFactorY = display.contentHeight / length
-		
-		if isMirror(i) == 1 then
-			tiles[i] = display.newImageRect("mirror.png",sizeX,sizeY)
-			tiles[i].X =  x + adjustmentFactorX
-			tiles[i].Y = y + adjustmentFactorY
-		elseif isMirror(i) == 2 then
-			tiles[i] = display.newImageRect("mirror.png",sizeX,sizeY)
-			tiles[i].X =  x + adjustmentFactorX
-			tiles[i].Y = y + adjustmentFactorY			
-		else
-			tiles[i] = display.newImageRect("Tile.jpg",sizeX,sizeY)
-			tiles[i].X =  x + adjustmentFactorX
-			tiles[i].Y = y + adjustmentFactorY
-			
+	local sizeX = (screenWidth * 0.6) / width
+	local sizeY = (screenHeight * 0.6) / length
+	local startX = display.contentCenterX - (width * sizeX)/2 + sizeX/2
+	local startY = display.contentCenterY - (length * sizeY)/2 + sizeY/2
+	for i = 1, width do
+		for j = 1, length do
+			r = math.random(1,3)
+			if r == 1 then
+				tiles[mirrorcount]=spawnTile(sizeX, sizeY, startX + (i-1) * sizeX,  startY + (j-1) * sizeY, "tile")
+			elseif r == 2 then
+				tiles[mirrorcount]=spawnTile(sizeX, sizeY, startX + (i-1) * sizeX,  startY + (j-1) * sizeY, "left")
+			elseif r == 3 then
+				tiles[mirrorcount]=spawnTile(sizeX, sizeY, startX + (i-1) * sizeX,  startY + (j-1) * sizeY, "right")
+			end
+			mirrorcount = mirrorcount + 1
 		end
-		
-		tileCount = tileCount + 1
-		tiles[i].strokeWidth = 1
-		tiles[i]:setFillColor( 1, 1, 1 )
-		tiles[i]:setStrokeColor( 0, 0, 0)
-		
-        x = x + sizeX
-        count = count + 1
-		
-        if count == width then
-            count = 0
-            x = 0
-            y = y + sizeY
-        end
-
-
-
-	end 
+	end
+	spawnButtons(startX,startY, length,width,(sizeX + sizeY) * 0.12)
 end
-
+function spawnButtons(startX, startY, length, width, radius)
+	local sizeX = (screenWidth * 0.6) / width
+	local sizeY = (screenHeight * 0.6) / length
+	local x = 0
+	local y = 0
+	local count = 0
+	for i = 0, width-1 do
+		x = startX + (i) * sizeX
+		y = startY - sizeY
+		buttons[count] = display.newCircle( x, y, radius)
+		count = count + 1
+	end
+	x = x + sizeX 
+	for i = 0, length-1 do
+		y = startY + ((i) * sizeY)
+		buttons[count] = display.newCircle( x, y, radius)
+		count = count + 1
+	end
+	y = y + sizeY
+	startX = x - sizeX
+	for i = 0, width-1 do
+		x = startX - (i) * sizeX
+		buttons[count] = display.newCircle( x, y, radius)
+		count = count + 1
+	end
+	x = x - sizeX
+	startY = y - sizeY
+	for i = 0, length-1 do
+		y = startY - (i) * sizeY
+		buttons[count] = display.newCircle( x, y, radius)
+		count = count + 1
+	end
+end
 function setDimensions(level)
 	if level % 5 == 0 then 
 		factor = level / 5;
@@ -117,6 +126,14 @@ function setDimensions(level)
 		length = length + factor
 	end
 end
+
+------------------------
+-- END Grid generation  
+------------------------
+
+----------------
+-- BEGIN Mirror   
+----------------
 
 function isMirror(gridCount)
 	
@@ -147,11 +164,15 @@ function isMirror(gridCount)
 		end
 	end
 end
+----------------
+-- END Mirror   
+----------------
 
 ----------------------
 -- BEGIN laser code
 ----------------------
 
+-- for the burst effect when laser hits
 local function clearObject( object )
     display.remove( object )
     object = nil
@@ -159,17 +180,30 @@ end
 
 
 local function resetBeams()
-
     -- Clear all beams/bursts from display
     for i = beamGroup.numChildren,1,-1 do
         local child = beamGroup[i]
         display.remove( child )
         child = nil
     end
-
     -- Reset beam group alpha
     beamGroup.alpha = 1
+end
 
+local function laserStartingPost()
+    local maxPos = width*2 + length*2 
+    -- number of possible starting positions is based on the generated grid
+    -- we will count from the top left corner to the right and so on.
+    local startPos = math.random(1, maxPos)   
+    if (startPos > 0 and startPos <= width) then
+        laserDirection = -90
+    elseif (startPos > width and startPos <= width + length) then
+        laserDirection = 180
+    elseif (startPos > width + length and startPos <= width*2 + length) then
+        laserDirection = 90
+    elseif (startPos > width*2 + length and startPos <= maxPos) then
+        laserDirection = 0
+    end
 end
 
 local function drawBeam( startX, startY, endX, endY )
@@ -183,11 +217,12 @@ local function drawBeam( startX, startY, endX, endY )
     beam3.strokeWidth = 6 ; beam3:setStrokeColor( 1, 0.196, 0.157, 0.392 ) ; beam3.blendMode = "add" ; beam3:toBack()
 end
 
+-- Perform ray cast
 local function castRay( startX, startY, endX, endY )
-
-    -- Perform ray cast
-    local hits = physics.rayCast( startX, startY, endX, endY, "closest" ) 
-    -- Return only the closest hit from the starting point, if any. 
+    -- hits array contains all hit locations
+    local hits = physics.rayCast( startX, startY, endX, endY, "sorted" ) 
+    -- "sorted" — Return all results, sorted from closest to farthest.
+    -- objects hit can be accessed by the following: hits[i].object 
     -- There is a hit; calculate the entire ray sequence (initial ray and reflections)
     if ( hits and beamGroup.numChildren <= maxBeams ) then
 
@@ -207,6 +242,7 @@ local function castRay( startX, startY, endX, endY )
         drawBeam( startX, startY, hitX, hitY )
 
         -- Check for and calculate the reflected ray
+        -- This may be an overkill since all of the mirrors will just be at 45 degree. But future updates may need it
         local reflectX, reflectY = physics.reflectRay( startX, startY, hitFirst )
         local reflectLen = 1600
         local reflectEndX = ( hitX + ( reflectX * reflectLen ) )
@@ -228,33 +264,27 @@ local function castRay( startX, startY, endX, endY )
     end
 end
 
-
-local function fireOnTimer( event )
-
-    -- Ensure that all previous beams/bursts are cleared/complete before firing
-    if beamGroup.numChildren == 0 then
-
-        -- Stop rotating turret as it fires
-        turret.angularVelocity = 0
-
-        -- Play laser sound
-        audio.play( sndLaserHandle )
-
-        -- Calculate ending x/y of beam
-        local xDest = turret.x - (math.cos(math.rad(turret.rotation+90)) * 1600 )
-        local yDest = turret.y - (math.sin(math.rad(turret.rotation+90)) * 1600 )
-
-        -- Cast the initial ray
-        castRay( turret.x, turret.y, xDest, yDest )
-    end
-end
-
 ----------------------
 -- END laser code
 ----------------------
 
+local function gameStart()
+    --1) generate level based on difficulty
+    setDimensions(level)
+    generate(width,length)
+    --2) spawn mirror
+    --3) spawn laser
+    --4) test if the number of mirrors hit corresponds the current difficulty
+    --5) if 4) fails go back to 2)
+    --6) if 4) works show mirror for 3-4 seconds
+    --7) make mirror disappear
+    --8) wait for user's tap respond
+    --9) If correct: difficulty + 1, score goes up, repeat step 1. If wrong: difficulty - 1: repeat step 1
+    --10) ...
+end
+
+
 function scene:create( event )
-    --
     -- self in this case is "scene", the scene object for this level. 
     -- Make a local copy of the scene's "view group" and call it "sceneGroup". 
     -- This is where you must insert everything (display.* objects only) that you want
@@ -266,38 +296,25 @@ function scene:create( event )
 
     -- Composer to manage for you.
     local sceneGroup = self.view
-	setDimensions(level)
-	generate(width,length)
     local background = display.newRect(display.contentCenterX, display.contentCenterY, display.contentWidth, display.contentHeight)
+
 
     background:setFillColor(0,0,0)
 
     --
     -- Insert it into the scene to be managed by Composer
     --
-    sceneGroup:insert(background)
 
     --
     -- levelText is going to be accessed from the scene:show function. It cannot be local to
     -- scene:create(). This is why it was declared at the top of the module so it can be seen 
     -- everywhere in this module
-    levelText = display.newText("Level" .. myData.settings.currentLevel , 0, 0, native.systemFontBold, 20 )
+    levelText = display.newText("Level " .. level , 0, 0, native.systemFontBold, 20 )
     levelText:setFillColor( 0 )
     levelText.x = 35
     levelText.y = 10
-    --
-    -- Insert it into the scene to be managed by Composer
-    --
-    sceneGroup:insert( levelText )
 
-    -- 
-    -- because we want to access this in multiple functions, we need to forward declare the variable and
-    -- then create the object here in scene:create()
-    --
     currentScoreDisplay = display.newText("000000", display.contentWidth - 50, 10, native.systemFont, 16 )
-    sceneGroup:insert( currentScoreDisplay )
-
-		
 
     mirror = display.newImage( "mirror.png" )
 	mirror.x = 160; mirror.y = 195
@@ -312,13 +329,14 @@ function scene:create( event )
     -- going between scenes (as well as demo widget.newButton)
     
     
-    physics.addBody( mirror, "static", { shape={-9,-49,9,-49,9,49,-9,49} } )
-    mirror.x = display.contentCenterX
-    mirror.y = display.contentCenterY
-    sceneGroup:insert( mirror)
-    castRay(0,0,1100,700 )
-end
+    -- insert into group (the order does matter, whatever is inserted first will be at the bottom)
+    sceneGroup:insert(background)
+    sceneGroup:insert(levelText)
+    sceneGroup:insert(currentScoreDisplay)
+    -- where the magic happens
+    gameStart() 
 
+end
 --
 -- This gets called twice, once before the scene is moved on screen and again once
 -- afterwards as a result of calling composer.gotoScene()
