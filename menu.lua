@@ -52,15 +52,16 @@ function scene:create( event )
     -- setup a page background, really not that important though composer
     -- crashes out if there isn't a display object in the view.
     --
-    local background = display.newRect( 0, 0, 570, 360 )
+    local background = display.newRect( 0, 0, display.contentWidth, display.contentHeight )
     background.x = display.contentCenterX
     background.y = display.contentCenterY
+    background:setFillColor( black)
     sceneGroup:insert( background )
 
     local title = display.newText("Flash", 100, 32, native.systemFontBold, 32 )
     title.x = display.contentCenterX
     title.y = 40
-    title:setFillColor( 0 )
+    title:setFillColor( 1,1,1 )
     sceneGroup:insert( title )
 
     -- Create the widget

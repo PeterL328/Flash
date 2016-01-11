@@ -33,7 +33,7 @@ local tileCount = 0
 local width = 2
 local length = 3
 local tiles = {}
-local level = 5
+local level = 10
 local buttons = {}
 local mirrors = {}
 local mirrorcount = 0
@@ -46,6 +46,43 @@ local beamGroup = display.newGroup() -- group for laser objects
 local maxBeams = 50  -- maximun beam count
 local laserDirection -- in degrees eg. 0, 90, 180, -90
 
+
+----------------
+-- BEGIN Mirror   
+----------------
+
+local function isMirror(gridCount)
+    
+    local minSpawn = math.ceil(level / 5) -- minSpawn is based on the level
+    local maxSpawn = minSpawn * 4         -- maxSpwan based on minSpawn
+    local r = math.random(1,3)            -- random value to choose between 3 differnt types of tiles
+    
+    if  (gridCount >= math.floor(tileCount / 4) and mirrorcount < minSpawn and r == 3) then -- if game goes through first quarter of grid and mirrorcount is still less than minimum mirror spawn required then it must spawn a mirror
+        r = math.random(1,2)    
+    end
+    -- 1 = orientation 1 --> \
+    -- 2 = orientation 2 --> /
+    -- 3 = no mirror     --> 
+    if mirrorcount < maxSpawn then --only spawn mirrors if mirrorcount is less than maxSpawn  FOR FAIRNESS OF THE GAMe
+        if r == 1 then
+            mirrorcount = mirrorcount + 1
+            return 1 
+        end
+
+        if r == 2 then
+            mirrorcount = mirrorcount + 1
+            return 2
+        end
+            
+        if r == 3 then
+            mirrorcount = mirrorcount + 1
+            return 3
+        end
+    end
+end
+----------------
+-- END Mirror   
+----------------
 ------------------------
 -- BEGIN Grid generation  
 ------------------------
@@ -55,18 +92,43 @@ local function spawnTile( sizeX, sizeY, xPos, yPos, tileType)
 		local tile = display.newImageRect( "Tile.png", sizeX, sizeY )
 		tile.x = xPos
 		tile.y = yPos
-	elseif  tileType  == "left" then
-		local tile = display.newImageRect( "left.png", sizeX, sizeY )
-		tile.x = xPos
-		tile.y = yPos
-	elseif  tileType  == "right" then
-		local tile = display.newImageRect( "right.png", sizeX, sizeY )
-		tile.x = xPos
-		tile.y = yPos
-	end
+    end
 	return tile
 end
-function generate(length, width)
+local function spawnButtons(startX, startY, length, width, radius)
+    local sizeX = (screenWidth * 0.6) / width
+    local sizeY = (screenHeight * 0.6) / length
+    local x = 0
+    local y = 0
+    local count = 0
+    for i = 0, width-1 do
+        x = startX + (i) * sizeX
+        y = startY - sizeY
+        buttons[count] = display.newCircle( x, y, radius)
+        count = count + 1
+    end
+    x = x + sizeX 
+    for i = 0, length-1 do
+        y = startY + ((i) * sizeY)
+        buttons[count] = display.newCircle( x, y, radius)
+        count = count + 1
+    end
+    y = y + sizeY
+    startX = x - sizeX
+    for i = 0, width-1 do
+        x = startX - (i) * sizeX
+        buttons[count] = display.newCircle( x, y, radius)
+        count = count + 1
+    end
+    x = x - sizeX
+    startY = y - sizeY
+    for i = 0, length-1 do
+        y = startY - (i) * sizeY
+        buttons[count] = display.newCircle( x, y, radius)
+        count = count + 1
+    end
+end
+local function generate(length, width)
 	local sizeX = (screenWidth * 0.6) / width
 	local sizeY = (screenHeight * 0.6) / length
 	local startX = display.contentCenterX - (width * sizeX)/2 + sizeX/2
@@ -86,7 +148,7 @@ function generate(length, width)
 				mirror.y =  startY + (j-1) * sizeY
 				physics.addBody( mirror, "static", { shape={-9,-49,9,-49,9,49,-9,49} } )
 			elseif check == 3 then
-				local mirror = display.newImageRect( "left.png", sizeX, sizeY )
+				local mirror = display.newImageRect( "right.png", sizeX, sizeY )
 				mirror.x = startX + (i-1) * sizeX
 				mirror.y =  startY + (j-1) * sizeY
 				physics.addBody( mirror, "static", { shape={-9,-49,9,-49,9,49,-9,49} } )
@@ -95,40 +157,8 @@ function generate(length, width)
 	end
 	spawnButtons(startX,startY, length,width,(sizeX + sizeY) * 0.12)
 end
-function spawnButtons(startX, startY, length, width, radius)
-	local sizeX = (screenWidth * 0.6) / width
-	local sizeY = (screenHeight * 0.6) / length
-	local x = 0
-	local y = 0
-	local count = 0
-	for i = 0, width-1 do
-		x = startX + (i) * sizeX
-		y = startY - sizeY
-		buttons[count] = display.newCircle( x, y, radius)
-		count = count + 1
-	end
-	x = x + sizeX 
-	for i = 0, length-1 do
-		y = startY + ((i) * sizeY)
-		buttons[count] = display.newCircle( x, y, radius)
-		count = count + 1
-	end
-	y = y + sizeY
-	startX = x - sizeX
-	for i = 0, width-1 do
-		x = startX - (i) * sizeX
-		buttons[count] = display.newCircle( x, y, radius)
-		count = count + 1
-	end
-	x = x - sizeX
-	startY = y - sizeY
-	for i = 0, length-1 do
-		y = startY - (i) * sizeY
-		buttons[count] = display.newCircle( x, y, radius)
-		count = count + 1
-	end
-end
-function setDimensions(level)
+
+local function setDimensions(level)
 	if level % 5 == 0 then 
 		factor = level / 5;
 		width = width + factor
@@ -139,43 +169,6 @@ end
 ------------------------
 -- END Grid generation  
 ------------------------
-
-----------------
--- BEGIN Mirror   
-----------------
-
-function isMirror(gridCount)
-	
-	local minSpawn = math.ceil(level / 5) -- minSpawn is based on the level
-	local maxSpawn = minSpawn * 4         -- maxSpwan based on minSpawn
-	local r = math.random(1,3)			  -- random value to choose between 3 differnt types of tiles
-	
-	if  (gridCount >= math.floor(tileCount / 4) and mirrorcount < minSpawn and r == 3) then -- if game goes through first quarter of grid and mirrorcount is still less than minimum mirror spawn required then it must spawn a mirror
-		r = math.random(1,2)	
-	end
-	-- 1 = orientation 1 --> \
-	-- 2 = orientation 2 --> /
-	-- 3 = no mirror     --> 
-	if mirrorcount < maxSpawn then --only spawn mirrors if mirrorcount is less than maxSpawn  FOR FAIRNESS OF THE GAMe
-		if r == 1 then
-			mirrorcount = mirrorcount + 1
-			return 1 
-		end
-
-		if r == 2 then
-			mirrorcount = mirrorcount + 1
-			return 2
-		end
-			
-		if r == 3 then
-			mirrorcount = mirrorcount + 1
-			return 3
-		end
-	end
-end
-----------------
--- END Mirror   
-----------------
 
 ----------------------
 -- BEGIN laser code
@@ -199,21 +192,6 @@ local function resetBeams()
     beamGroup.alpha = 1
 end
 
-local function laserStartingPost()
-    local maxPos = width*2 + length*2 
-    -- number of possible starting positions is based on the generated grid
-    -- we will count from the top left corner to the right and so on.
-    local startPos = math.random(1, maxPos)   
-    if (startPos > 0 and startPos <= width) then
-        laserDirection = -90
-    elseif (startPos > width and startPos <= width + length) then
-        laserDirection = 180
-    elseif (startPos > width + length and startPos <= width*2 + length) then
-        laserDirection = 90
-    elseif (startPos > width*2 + length and startPos <= maxPos) then
-        laserDirection = 0
-    end
-end
 
 local function drawBeam( startX, startY, endX, endY )
 
@@ -273,6 +251,39 @@ local function castRay( startX, startY, endX, endY )
     end
 end
 
+local function laserStartingPosition()
+    local maxPos = width*2 + length*2 
+    -- number of possible starting positions is based on the generated grid
+    -- we will count from the top left corner to the right and so on.
+    local startPos = math.random(1, maxPos) 
+    local startx = buttons[startPos].x
+    local starty = buttons[startPos].y
+    local sizeX = (screenWidth * 0.6) / width
+    local sizeY = (screenHeight * 0.6) / length
+
+    -- First case: The random is at the top 
+    if (startPos > 0 and startPos <= width) then
+        laserDirection = -90
+        -- Shot the laser from the top circle to the bottom circle
+        castRay(startx, starty, startx , starty + (width+1*sizeY))
+    -- Second case: The random is at the right
+    elseif (startPos > width and startPos <= width + length) then
+        laserDirection = 180
+        -- Shot the laser from the right circle to the left circle
+        castRay(startx, starty, startx - (length+1*sizeX) , starty)
+    -- Third case: The random is at the bottom
+    elseif (startPos > width + length and startPos <= width*2 + length) then
+        laserDirection = 90
+        -- Shot the laser from the bottom circle to the top circle
+        castRay(startx, starty, startx , starty - (width+1*sizeY))
+    -- Fourth case: The random is at the left
+    elseif (startPos > width*2 + length and startPos <= maxPos) then
+        laserDirection = 0
+        -- Shot the laser from the left circle to the right circle
+        castRay(startx, starty, startx + (length+1*sizeX) , starty)
+    end
+end
+
 ----------------------
 -- END laser code
 ----------------------
@@ -283,6 +294,7 @@ local function gameStart()
     generate(width,length)
     --2) spawn mirror
     --3) spawn laser
+    laserStartingPosition()
     --4) test if the number of mirrors hit corresponds the current difficulty
     --5) if 4) fails go back to 2)
     --6) if 4) works show mirror for 3-4 seconds
