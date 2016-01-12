@@ -33,7 +33,7 @@ local tileCount = 0
 local width = 2
 local length = 3
 local tiles = {}
-local level = 5
+local level = 40
 local buttons = {}
 local edges = {} 
 local mirrorcount = 0
@@ -73,15 +73,15 @@ function generate(length, width)
 	local startY = display.contentCenterY - (length * sizeY)/2 + sizeY/2
 	for i = 1, width do
 		for j = 1, length do
-			r = math.random(1,3)
-			if r == 1 then
+			local check = isMirror(i*j)
+			if check >= 3 then
 				tiles[mirrorcount]=spawnTile(sizeX, sizeY, startX + (i-1) * sizeX,  startY + (j-1) * sizeY, "tile")
-			elseif r == 2 then
+			elseif check == 2 then
 				tiles[mirrorcount]=spawnTile(sizeX, sizeY, startX + (i-1) * sizeX,  startY + (j-1) * sizeY, "left")
-			elseif r == 3 then
+			elseif check == 1 then
 				tiles[mirrorcount]=spawnTile(sizeX, sizeY, startX + (i-1) * sizeX,  startY + (j-1) * sizeY, "right")
 			end
-			mirrorcount = mirrorcount + 1
+			--mirrorcount = mirrorcount + 1
 		end
 	end
 	spawnButtons(startX,startY, length,width,(sizeX + sizeY) * 0.12)
@@ -139,29 +139,32 @@ function isMirror(gridCount)
 	
 	local minSpawn = math.ceil(level / 5) -- minSpawn is based on the level
 	local maxSpawn = minSpawn * 4         -- maxSpwan based on minSpawn
-	local r = math.random(1,3)			  -- random value to choose between 3 differnt types of tiles
+	local r = math.random(1,5)			  -- random value to choose between 3 differnt types of tiles
 	
-	if  (gridCount >= math.floor(tileCount / 4) and mirrorcount < minSpawn and r == 3) then -- if game goes through first quarter of grid and mirrorcount is still less than minimum mirror spawn required then it must spawn a mirror
+	if  (gridCount >= math.floor(tileCount / 4) and mirrorcount < minSpawn and r == 1) then -- if game goes through first quarter of grid and mirrorcount is still less than minimum mirror spawn required then it must spawn a mirror
 		r = math.random(1,2)	
 	end
 	-- 1 = orientation 1 --> \
 	-- 2 = orientation 2 --> /
-	-- 3 = no mirror     --> 
+	-- >=3 = no mirror     --> 
 	if mirrorcount < maxSpawn then --only spawn mirrors if mirrorcount is less than maxSpawn  FOR FAIRNESS OF THE GAMe
 		if r == 1 then
 			mirrorcount = mirrorcount + 1
-			return 1 
+			return r 
 		end
 
 		if r == 2 then
 			mirrorcount = mirrorcount + 1
-			return 2
+			return r
 		end
-			
-		if r == 3 then
-			mirrorcount = mirrorcount + 1
-			return 3
+
+		if r >= 3 then
+			return r
 		end
+	
+	elseif mirrorcount >= maxSpawn then
+			r = math.random(3,5)
+			return r
 	end
 end
 ----------------
