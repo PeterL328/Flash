@@ -30,10 +30,10 @@ local currentScoreDisplay   -- will be a display.newText() that draws the score 
 local levelText             -- will be a display.newText() to let you know what level you're on
 local spawnTimer            -- will be used to hold the timer for the spawning engine
 local tileCount = 0
-local width = 2
-local length = 3
+local width = 3
+local length = 2
 local tiles = {}
-local level = 40
+local level = 20
 local buttons = {}
 local mirrors = {}
 local mirrorcount = 0
@@ -41,7 +41,9 @@ local tilecount = 0
 local screenWidth = display.contentWidth;
 local screenHeight = display.contentHeight;
 
-
+local circleGroup = display.newGroup()
+local tileGroup = display.newGroup()
+local mirrorGroup = display.newGroup() 
 local beamGroup = display.newGroup() -- group for laser objects
 local maxBeams = 50  -- maximun beam count
 local laserDirection -- in degrees eg. 0, 90, 180, -90
@@ -94,14 +96,15 @@ end
 local function spawnTile( sizeX, sizeY, xPos, yPos, tileType)
 	if tileType  == "tile" then
 		local tile = display.newImageRect( "Tile.png", sizeX, sizeY )
+        tileGroup:insert(tile)
 		tile.x = xPos
 		tile.y = yPos
     end
 	return tile
 end
 local function spawnButtons(startX, startY, length, width, radius)
-    local sizeX = (screenWidth * 0.6) / width
-    local sizeY = (screenHeight * 0.6) / length
+    local sizeX = (screenWidth * 0.8) / width
+    local sizeY = sizeX
     local x = 0
     local y = 0
     local count = 0
@@ -109,12 +112,14 @@ local function spawnButtons(startX, startY, length, width, radius)
         x = startX + (i) * sizeX
         y = startY - sizeY
         buttons[count] = display.newCircle( x, y, radius)
+        circleGroup:insert(buttons[count])
         count = count + 1
     end
     x = x + sizeX 
     for i = 0, length-1 do
         y = startY + ((i) * sizeY)
         buttons[count] = display.newCircle( x, y, radius)
+        circleGroup:insert(buttons[count])
         count = count + 1
     end
     y = y + sizeY
@@ -122,6 +127,7 @@ local function spawnButtons(startX, startY, length, width, radius)
     for i = 0, width-1 do
         x = startX - (i) * sizeX
         buttons[count] = display.newCircle( x, y, radius)
+        circleGroup:insert(buttons[count])
         count = count + 1
     end
     x = x - sizeX
@@ -129,12 +135,13 @@ local function spawnButtons(startX, startY, length, width, radius)
     for i = 0, length-1 do
         y = startY - (i) * sizeY
         buttons[count] = display.newCircle( x, y, radius)
+        circleGroup:insert(buttons[count])
         count = count + 1
     end
 end
 local function generate(length, width)
-	local sizeX = (screenWidth * 0.6) / width
-	local sizeY = (screenHeight * 0.6) / length
+	local sizeX = (screenWidth * 0.8) / width
+	local sizeY = sizeX
 	local startX = display.contentCenterX - (width * sizeX)/2 + sizeX/2
 	local startY = display.contentCenterY - (length * sizeY)/2 + sizeY/2
 	for i = 1, width do
@@ -148,14 +155,16 @@ local function generate(length, width)
 			local check = isMirror(i*j)
 			if check == 2 then
 				local mirror = display.newImageRect( "left.png", sizeX, sizeY )
+                mirrorGroup:insert(mirror)
 				mirror.x = startX + (i-1) * sizeX
 				mirror.y =  startY + (j-1) * sizeY
-				--physics.addBody( mirror, "static", {shape = {sizeX* 0.8, 0, sizeY, sizeX*0.2, sizeX*0.2, sizeY, 0, sizeY*0.8} })
+				physics.addBody( mirror, "static", {shape = {sizeX* 0.8, 0, sizeY, sizeX*0.2, sizeX*0.2, sizeY, 0, sizeY*0.8} })
 			elseif check == 3 then
 				local mirror = display.newImageRect( "right.png", sizeX, sizeY )
+                mirrorGroup:insert(mirror)
 				mirror.x = startX + (i-1) * sizeX
 				mirror.y =  startY + (j-1) * sizeY
-				physics.addBody( mirror, "static", {box = {angle = -45} })
+				physics.addBody( mirror, "static", {shape = {sizeX*0.2, 0, sizeX, sizeY*0.8, sizeX*0.8, sizeY, 0, sizeY*0.2} })
 			end
 		end
 	end
@@ -260,32 +269,32 @@ local function laserStartingPosition()
     local maxPos = width*2 + length*2 
     -- number of possible starting positions is based on the generated grid
     -- we will count from the top left corner to the right and so on.
-    local startPos = math.random(1, maxPos) 
+    local startPos = math.random(0, maxPos-1) 
     local startx = buttons[startPos].x
     local starty = buttons[startPos].y
-    local sizeX = (screenWidth * 0.6) / width
-    local sizeY = (screenHeight * 0.6) / length
+    local sizeX = (screenWidth * 0.8) / width
+    local sizeY = sizeX
 
     -- First case: The random is at the top 
-    if (startPos > 0 and startPos <= width) then
+    if (startPos >= 0 and startPos < width) then
         laserDirection = -90
         -- Shot the laser from the top circle to the bottom circle
-        castRay(startx, starty, startx , starty + (width+1*sizeY))
+        castRay(startx, starty, startx , starty + ((length+1)*sizeY))
     -- Second case: The random is at the right
-    elseif (startPos > width and startPos <= width + length) then
+    elseif (startPos >= width and startPos < (width + length)) then
         laserDirection = 180
         -- Shot the laser from the right circle to the left circle
-        castRay(startx, starty, startx - (length+1*sizeX) , starty)
+        castRay(startx, starty, startx - ((width+1)*sizeX) , starty)
     -- Third case: The random is at the bottom
-    elseif (startPos > width + length and startPos <= width*2 + length) then
+    elseif (startPos >= (width + length) and (startPos < (width*2) + length)) then
         laserDirection = 90
         -- Shot the laser from the bottom circle to the top circle
-        castRay(startx, starty, startx , starty - (width+1*sizeY))
+        castRay(startx, starty, startx , starty - ((length+1)*sizeY))
     -- Fourth case: The random is at the left
-    elseif (startPos > width*2 + length and startPos <= maxPos) then
+    elseif (startPos >= width*2 + length and startPos < maxPos) then
         laserDirection = 0
         -- Shot the laser from the left circle to the right circle
-        castRay(startx, starty, startx + (length+1*sizeX) , starty)
+        castRay(startx, starty, startx + ((width+1)*sizeX) , starty)
     end
 end
 
@@ -349,6 +358,10 @@ function scene:create( event )
     sceneGroup:insert(background)
     sceneGroup:insert(levelText)
     sceneGroup:insert(currentScoreDisplay)
+    sceneGroup:insert(tileGroup)
+    sceneGroup:insert(circleGroup)
+    sceneGroup:insert(mirrorGroup)
+    sceneGroup:insert(beamGroup)
     -- where the magic happens
     gameStart() 
     
