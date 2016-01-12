@@ -150,12 +150,12 @@ local function generate(length, width)
 				local mirror = display.newImageRect( "left.png", sizeX, sizeY )
 				mirror.x = startX + (i-1) * sizeX
 				mirror.y =  startY + (j-1) * sizeY
-				physics.addBody( mirror, "static", { shape={-9,-49,9,-49,9,49,-9,49} } )
+				--physics.addBody( mirror, "static", {shape = {sizeX* 0.8, 0, sizeY, sizeX*0.2, sizeX*0.2, sizeY, 0, sizeY*0.8} })
 			elseif check == 3 then
 				local mirror = display.newImageRect( "right.png", sizeX, sizeY )
 				mirror.x = startX + (i-1) * sizeX
 				mirror.y =  startY + (j-1) * sizeY
-				physics.addBody( mirror, "static", { shape={-9,-49,9,-49,9,49,-9,49} } )
+				physics.addBody( mirror, "static", {box = {angle = -45} })
 			end
 		end
 	end
@@ -345,14 +345,13 @@ function scene:create( event )
     -- these two buttons exist as a quick way to let you test
     -- going between scenes (as well as demo widget.newButton)
     
-    
     -- insert into group (the order does matter, whatever is inserted first will be at the bottom)
     sceneGroup:insert(background)
     sceneGroup:insert(levelText)
     sceneGroup:insert(currentScoreDisplay)
     -- where the magic happens
     gameStart() 
-
+    
 end
 --
 -- This gets called twice, once before the scene is moved on screen and again once
