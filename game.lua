@@ -30,10 +30,11 @@ local currentScoreDisplay   -- will be a display.newText() that draws the score 
 local levelText             -- will be a display.newText() to let you know what level you're on
 local spawnTimer            -- will be used to hold the timer for the spawning engine
 local tileCount = 0
-local width = 2
+local width = 3
 local length = 3
 local tiles = {}
-local level = 20
+local level = 6
+local factor = 0
 local buttons = {}
 local mirrors = {}
 local mirrorcount = 0
@@ -166,15 +167,16 @@ local function generate(length, width)
 			end
 		end
 	end
-	spawnButtons(startX,startY, length,width, sizeX * 0.2,sizeX)
+	spawnButtons(startX,startY, length,width, (screenWidth * 0.1)/2 ,sizeX)
 end
 
 local function setDimensions(level)
 	if level % 5 == 0 then 
-		factor = level / 5;
-		width = width + factor
-		length = length + factor
+		factor = factor +  1
 	end
+	factor = level / 5
+	width = width + factor
+	length = length + factor
 end
 
 ------------------------
