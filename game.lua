@@ -30,8 +30,8 @@ local currentScoreDisplay   -- will be a display.newText() that draws the score 
 local levelText             -- will be a display.newText() to let you know what level you're on
 local spawnTimer            -- will be used to hold the timer for the spawning engine
 local tileCount = 0
-local width = 3
-local length = 2
+local width = 2
+local length = 3
 local tiles = {}
 local level = 20
 local buttons = {}
@@ -102,56 +102,54 @@ local function spawnTile( sizeX, sizeY, xPos, yPos, tileType)
     end
 	return tile
 end
-local function spawnButtons(startX, startY, length, width, radius)
-    local sizeX = (screenWidth * 0.8) / width
-    local sizeY = sizeX
+local function spawnButtons(startX, startY, length, width, radius,spacing)
     local x = 0
     local y = 0
     local count = 0
-    for i = 0, width-1 do
-        x = startX + (i) * sizeX
-        y = startY - sizeY
-        buttons[count] = display.newCircle( x, y, radius)
-        circleGroup:insert(buttons[count])
-        count = count + 1
-    end
-    x = x + sizeX 
     for i = 0, length-1 do
-        y = startY + ((i) * sizeY)
+        x = startX + (i) * spacing
+        y = startY - spacing
         buttons[count] = display.newCircle( x, y, radius)
         circleGroup:insert(buttons[count])
         count = count + 1
     end
-    y = y + sizeY
-    startX = x - sizeX
+    x = x + spacing 
     for i = 0, width-1 do
-        x = startX - (i) * sizeX
+        y = startY + ((i) * spacing)
         buttons[count] = display.newCircle( x, y, radius)
         circleGroup:insert(buttons[count])
         count = count + 1
     end
-    x = x - sizeX
-    startY = y - sizeY
-    for i = 0, length-1 do
-        y = startY - (i) * sizeY
+    y = y + spacing
+    startX = x - spacing
+    for i = 0, length - 1 do
+        x = startX - (i) * spacing
+        buttons[count] = display.newCircle( x, y, radius)
+        circleGroup:insert(buttons[count])
+        count = count + 1
+    end
+    x = x - spacing
+    startY = y - spacing
+    for i = 0, width - 1 do
+        y = startY - (i) * spacing
         buttons[count] = display.newCircle( x, y, radius)
         circleGroup:insert(buttons[count])
         count = count + 1
     end
 end
 local function generate(length, width)
-	local sizeX = (screenWidth * 0.8) / width
+	local sizeX = (screenWidth * 0.8) / length
 	local sizeY = sizeX
-	local startX = display.contentCenterX - (width * sizeX)/2 + sizeX/2
-	local startY = display.contentCenterY - (length * sizeY)/2 + sizeY/2
-	for i = 1, width do
-		for j = 1, length do
+	local startX = display.contentCenterX - (length * sizeX)/2 + sizeX/2
+	local startY = display.contentCenterY - (width * sizeY)/2 + sizeY/2
+	for i = 1, length do
+		for j = 1, width do
 			tiles[tilecount]=spawnTile(sizeX, sizeY, startX + (i-1) * sizeX,  startY + (j-1) * sizeY, "tile")
 			tilecount = tilecount + 1
 		end
 	end
-	for i = 1, width do
-		for j = 1, length do
+	for i = 1, length do
+		for j = 1, width do
 			local check = isMirror(i*j)
 			if check == 2 then
 				local mirror = display.newImageRect( "left.png", sizeX, sizeY )
@@ -168,7 +166,7 @@ local function generate(length, width)
 			end
 		end
 	end
-	spawnButtons(startX,startY, length,width,(sizeX + sizeY) * 0.12)
+	spawnButtons(startX,startY, length,width, sizeX * 0.2,sizeX)
 end
 
 local function setDimensions(level)
